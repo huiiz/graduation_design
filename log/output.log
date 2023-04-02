@@ -1,0 +1,16 @@
+2023-04-01 18:03:49 ERROR CuttingErrorApp ScanImage_Image0 (2)传入出错
+[Errno 2] No such file or directory: 'ScanImage_Image0 (2)'
+2023-04-01 18:03:49 ERROR CuttingErrorApp ScanImage_Image0 (3)传入出错
+[Errno 2] No such file or directory: 'ScanImage_Image0 (3)'
+2023-04-01 18:03:49 ERROR CuttingErrorApp ScanImage_Image0 (4)传入出错
+[Errno 2] No such file or directory: 'ScanImage_Image0 (4)'
+2023-04-01 18:03:49 ERROR CuttingErrorApp ScanImage_Image0 (5)传入出错
+[Errno 2] No such file or directory: 'ScanImage_Image0 (5)'
+2023-04-01 18:05:30 ERROR CuttingErrorApp ScanImage_Image0 (2)传入出错
+[Errno 2] No such file or directory: 'ScanImage_Image0 (2)'
+2023-04-01 18:05:30 ERROR CuttingErrorApp ScanImage_Image0 (3)传入出错
+[Errno 2] No such file or directory: 'ScanImage_Image0 (3)'
+2023-04-01 18:05:30 ERROR CuttingErrorApp ScanImage_Image0 (4)传入出错
+[Errno 2] No such file or directory: 'ScanImage_Image0 (4)'
+2023-04-01 18:17:49 ERROR ResultBody temp/cut/ScanImage_Image0 (2).png传入出错
+[Errno 2] No such file or directory: 'temp/cut/ScanImage_Image0 (2).png'
