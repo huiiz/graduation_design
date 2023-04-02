@@ -1,8 +1,7 @@
 import flet as ft
 
-from img_process.change_tiff import cv2_base64, read_image
-from log.log import logger
-from utils import get_image_name_from_path
+from img_process.change_tiff import cv2_base64
+from img_process.basic import read_image
 
 
 # 结果主体内容，即最中间的图像显示部分。该部分的内容会随着左侧的图像缩略图的点击而改变，点击该部分会修改右侧上方的百分比
