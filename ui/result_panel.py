@@ -26,7 +26,8 @@ class ResultPanel(ft.UserControl):
             value='本图最终结果为：?'
         )
         self.change_button = ft.ElevatedButton(  # 点击修改结果按钮 click the button to change the result
-            text='预测结果错误，点击修改'
+            text='预测结果错误，点击修改',
+            on_click=self.change_result
         )
         self.item_result_control_panel = ft.Column(
             controls=[
@@ -47,7 +48,7 @@ class ResultPanel(ft.UserControl):
 
         # 所有图像部分BEGIN
         self.all_result = ft.Text(  # 整体数量部分
-            value='本批共选中?张样品图像，其中?张为存在缺陷样品，?张为无缺陷样品'
+            value='本批共选中?张样品图像，已完成检测0张，其中?张为存在缺陷样品，?张为正常样品'
         )
         self.show_result = ft.ElevatedButton(  # 预览结果
             text='预览结果',
@@ -85,7 +86,7 @@ class ResultPanel(ft.UserControl):
             alignment=ft.MainAxisAlignment.CENTER
         )
 
-    def change_result(self):
+    def change_result(self, e):
         """
         修改预测结果
         :return:
@@ -93,14 +94,24 @@ class ResultPanel(ft.UserControl):
         self.parent.final_result[self.item_name] = not self.parent.final_result[self.item_name]
         self.update()
 
+    def reset(self):
+        self.item_name = ''
+        self.percentage = 0
+        self.predict_percentage.value = '本区域为切割异常的可能性为：?%'
+        self.predict_result.value = '根据算法，本图预测结果为：?'
+        self.final_result.value = '本图最终结果为：?'
+        self.all_result.value = '本批共选中?张样品图像，已完成检测0张，其中?张为存在缺陷样品，?张为正常样品'
+        super().update()
+
     def update(self):
-        predict_defect = self.parent.predict_result[self.item_name]
-        final_predict_defect = self.parent.final_result[self.item_name]
+        predict_defect = self.parent.predict_result.get(self.item_name, {})
+        final_predict_defect = self.parent.final_result.get(self.item_name, {})
         self.predict_percentage.value = f'本区域为切割异常的可能性为：{round(self.percentage, 2)}%'
-        self.predict_result.value = f'预测结果为：{"有缺陷" if predict_defect else "正常"}'
+        self.predict_result.value = f'根据算法，本图预测结果为：{"有缺陷" if predict_defect else "正常"}'
         self.final_result.value = f'本图最终结果为：{"有缺陷" if final_predict_defect else "正常"}'
         normal_count = list(self.parent.final_result.values()).count(False)
         defect_count = list(self.parent.final_result.values()).count(True)
-        total_count = len(self.parent.final_result)
-        self.all_result.value = f'本批共选中{total_count}张样品图像，其中{defect_count}张为存在缺陷样品，{normal_count}张为无缺陷样品'
+        total_count = len(self.parent.img_list)
+        processed_count = len(self.parent.final_result)
+        self.all_result.value = f'本批共选中{total_count}张样品图像，已完成检测{processed_count}张，其中{defect_count}张为存在缺陷样品，{normal_count}张为正常样品'
         super().update()

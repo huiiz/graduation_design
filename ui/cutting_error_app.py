@@ -1,6 +1,8 @@
 from threading import Timer
 
-from check.check_defect import Defect
+import numpy as np
+
+from check.check_defect import Defect, clear_cut_dt, clear_defect_imgs_dt
 from log.log import logger
 import flet as ft
 from ui.result_body import ResultBody
@@ -35,7 +37,7 @@ class CuttingErrorApp(ft.UserControl):
         # 顶部操作栏END
 
         self.pb = ft.ProgressBar(visible=False)  # 进度条
-        parent.snack_bar = ft.SnackBar(content=ft.Text(value='1212'))  # 提示框
+        parent.snack_bar = ft.SnackBar(content=ft.Text(value=''))  # 提示框
         self.tip_box = parent.snack_bar
 
         # 中间内容BEGIN
@@ -195,6 +197,8 @@ class CuttingErrorApp(ft.UserControl):
         self.img_list = list(map(lambda f: f.path, e.files))
         self.have_select = True
         self.update_thumbs()  # 更新缩略图 update the thumbnail
+        self.main_content.reset()
+        self.result_panel.reset()
         self.update()
 
     def process(self, e):
@@ -214,6 +218,8 @@ class CuttingErrorApp(ft.UserControl):
         self.defect_dt = {}
         self.begin_to_process = True
         self.set_tip_value('分析数据中，请耐心等待......')
+        clear_cut_dt()
+        clear_defect_imgs_dt()
         i = 0
         for img in self.img_list:
             defect = Defect(img)
@@ -222,16 +228,20 @@ class CuttingErrorApp(ft.UserControl):
             defect.cut_image()
             i += 0.25
             self.set_pb_value(i / len(self.img_list))
-            self.defect_dt[get_image_name_from_path(img)] = defect.predict_cutted_images()
+            name = get_image_name_from_path(img)
+            self.defect_dt[name] = defect.predict_cutted_images()
+            have_defect = len(self.defect_dt[name]) > 0 and max(self.defect_dt[name].values()) > 0.9
+            self.predict_result[name] = have_defect
+            self.final_result[name] = have_defect
+            if i == 0.5:
+                self.thumb_img_ls.controls[0].click()
+            else:
+                self.result_panel.update()
             i += 0.5
             self.set_pb_value(i / len(self.img_list))
             # print(img, 'finish', self.defect_dt[img])
+
         self.set_tip_value('分析结束')
 
-        self.predict_result = {
-            k: len(v) > 0 for k, v in self.defect_dt.items()
-        }
-        self.final_result = self.predict_result
         print(self.defect_dt)
-        if len(self.defect_dt) > 0:
-            self.thumb_img_ls.controls[0].click()
+

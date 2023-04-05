@@ -1,11 +1,16 @@
 import os
 import json
 
+import numpy as np
 import torch
 from PIL import Image
 from torchvision import transforms
 
-from network.model import mobile_vit_xx_small as create_model
+model_weight_path = "./network/weights/xbest_model_g.pth"
+if 'xx' in model_weight_path:
+    from network.model import mobile_vit_xx_small as create_model
+else:
+    from network.model import mobile_vit_x_small as create_model
 class_indict = {
     "0": "ng",
     "1": "ok"
@@ -32,13 +37,13 @@ class Predict:
         # create model
         self.model = create_model(num_classes=2).to(self.device)
         # load model weights
-        model_weight_path = "./network/weights/best_model_a.pth"
         self.model.load_state_dict(torch.load(model_weight_path, map_location=self.device))
         self.model.eval()
 
-    def to_predict(self, img_path: str):
-        assert os.path.exists(img_path), "file: '{}' dose not exist.".format(img_path)
-        img = Image.open(img_path)
+    def to_predict(self, imgdata: np.ndarray):
+        # assert os.path.exists(img_path), "file: '{}' dose not exist.".format(img_path)
+        # img = Image.open(img_path)
+        img = Image.fromarray(imgdata)
         # [N, C, H, W]
         img = self.data_transform(img)
         # expand batch dimension

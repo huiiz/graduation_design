@@ -1,5 +1,6 @@
 import flet as ft
 
+from check.check_defect import get_defect_imgs_dt
 from img_process.change_tiff import cv2_base64
 from img_process.basic import read_image
 
@@ -9,10 +10,11 @@ class ResultBody(ft.UserControl):
     def __init__(self, parent):
         super().__init__()
         # 演示数据
+        self.places = None
         self.parent = parent
         self.item_name = None
         self.ng_dt = {}
-        self.img_paths = []
+        # self.img_paths = []
         self.percentages = []
         self.length = 0
         self.index = 0
@@ -76,9 +78,10 @@ class ResultBody(ft.UserControl):
         self.item_name = name
         self.ng_dt = self.parent.defect_dt.get(self.item_name, {})
         ngs = sorted(self.ng_dt.items(), key=lambda x: x[1], reverse=True)
-        self.img_paths = [f'temp/cut/{self.item_name}/{key}.png' for key in [ng[0] for ng in ngs]]
+        # self.img_paths = [f'temp/cut/{self.item_name}/{key}.png' for key in [ng[0] for ng in ngs]]
+        self.places = [ng[0] for ng in ngs]
         self.percentages = [ng[1] * 100 for ng in ngs]
-        self.length = len(self.img_paths)
+        self.length = len(self.percentages)
         self.index = 0
 
     def turn_left(self, e):
@@ -102,12 +105,25 @@ class ResultBody(ft.UserControl):
         else:
             self.right_button.disabled = False
 
+    def reset(self):
+        self.image_item.src_base64 = cv2_base64(read_image('source/to_show_img.png'))
+        self.places = None
+        self.item_name = None
+        self.ng_dt = {}
+        # self.img_paths = []
+        self.percentages = []
+        self.length = 0
+        self.index = 0
+        self.set_buttons()
+        super().update()
+
     def update(self):
         self.set_buttons()
         # 设置图片 set the image
         if self.length > 0:
-            self.image_item.src_base64 = cv2_base64(read_image(self.img_paths[self.index]))
-
+            self.image_item.src_base64 = cv2_base64(get_defect_imgs_dt(self.item_name, self.places[self.index]))
+        else:
+            self.image_item.src_base64 = cv2_base64(read_image('source/no_defect.png'))
         # 设置文字 set the text
         self.text.value = f'{self.index + 1 if self.length > 0 else self.index}/{self.length}'
 

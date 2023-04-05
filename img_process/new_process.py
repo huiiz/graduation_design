@@ -1,7 +1,5 @@
 import json
 
-import numpy as np
-
 from img_process.cut_image import save_img, cut_0
 
 from img_process.pre_process import get_useful_range, read_image

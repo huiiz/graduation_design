@@ -12,13 +12,11 @@ def read_image(img_path: str) -> np.ndarray:
     return img
 
 
-def get_image_by_range(img_data: np.ndarray, r1: int, r2: int, c1: int, c2: int) -> np.ndarray:
+def get_image_by_range(img_data: np.ndarray, ranges: tuple[int, int, int, int]) -> np.ndarray:
     """
     :param img_data:
-    :param r1:
-    :param r2:
-    :param c1:
-    :param c2:
+    :param ranges:
     :return:
     """
+    r1, r2, c1, c2 = ranges
     return img_data[r1:r2 + 1, c1:c2 + 1, :]

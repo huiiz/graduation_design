@@ -113,8 +113,8 @@ class ImageItem(ft.UserControl):
         if not self.parent.begin_to_process:  # 如果还没有开始处理
             self.parent.set_tip_value('请先处理数据！')
             return
-        elif len(self.parent.defect_dt) < len(self.parent.img_list):  # 如果有缺陷数据，但是缺陷数据的数量小于图像数量
-            self.parent.set_tip_value('请等待数据处理完成！')
+        elif self.img_name not in self.parent.defect_dt:  # 如果有缺陷数据，但是缺陷数据的数量小于图像数量
+            self.parent.set_tip_value('该图片正在处理，请等待处理完成再查看结果！')
             return
         if self.parent.selected_image_item:  # 如果调用父类中已经有选中的缩略图对象
             if id(self.parent.selected_image_item) == id(self):  # 判断选中的缩略图是不是当前这个
