@@ -1,14 +1,17 @@
+import time
+from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 from threading import Timer
 
-import numpy as np
-
 from check.check_defect import Defect, clear_cut_dt, clear_defect_imgs_dt
-from log.log import logger
+
 import flet as ft
+
+from log.log import logger
+from ui.manual_annotation import ManualAnnotation
 from ui.result_body import ResultBody
 from ui.result_panel import ResultPanel
 from ui.image_item import ImageItem
-from utils import get_image_name_from_path
+from utils import get_image_name_from_path, CPU_COUNT
 
 
 # 程序主界面 the main window
@@ -32,7 +35,8 @@ class CuttingErrorApp(ft.UserControl):
                                   )),
                 ft.ElevatedButton("开始分析", icon=ft.icons.LINE_AXIS_ROUNDED, on_click=self.process),
             ],
-            alignment=ft.MainAxisAlignment.CENTER
+            alignment=ft.MainAxisAlignment.CENTER,
+            height=40
         )
         # 顶部操作栏END
 
@@ -46,7 +50,27 @@ class CuttingErrorApp(ft.UserControl):
             scroll=ft.ScrollMode.ALWAYS,  # 设置显示滚动栏
 
         )
+        self.manual_annotation_control = ft.Container(
+            content=ft.Text('请点击手工标注按钮')
+        )
         self.main_content = ResultBody(self)  # 2.中间显示图片目标检测内容
+
+        self.main_content_tabs = ft.Tabs(
+                tabs=[
+                    ft.Tab(
+                        text="算法自动检测",
+                        content=self.main_content
+                    ),
+                    ft.Tab(
+                        text="手工标注缺陷",
+                        content=self.manual_annotation_control,
+                    ),
+                ],
+            selected_index=0,
+            animation_duration=300,
+            on_change=self.on_tab_change,
+                expand=1,
+            )
 
         self.result_panel = ResultPanel(self)  # 3.结果面板
         self.vertical_divider = ft.VerticalDivider(width=3)  # 垂直分隔符 vertical divider
@@ -59,7 +83,7 @@ class CuttingErrorApp(ft.UserControl):
                 ),
                 self.vertical_divider,
                 ft.Container(
-                    content=self.main_content,
+                    content=self.main_content_tabs,
                     expand=15,
                     alignment=ft.alignment.center
                 ),
@@ -95,6 +119,8 @@ class CuttingErrorApp(ft.UserControl):
         self.begin_to_process = False  # 是否开始处理图像
         self.predict_result = {}  # 预测结果 predict result, True表示有缺陷，False表示无缺陷
         self.final_result = {}  # 最终结果 final result
+        self.manual_annotation = {}  # 手动标注结果 manual annotation result
+        self.name_path_dt = {}
 
     def set_body_height(self):
         """
@@ -152,22 +178,42 @@ class CuttingErrorApp(ft.UserControl):
         :return: None
         """
         self.thumb_img_ls.controls.clear()  # 1.清除现有显示的缩略图内容 clear the existing thumbnail content
-        to_insert_thumbs = []  # 2.确定需要插入的缩略图对象 list of thumbnails to be inserted
         img_len = len(self.img_list)
-        success_count = 0
-        for path in self.img_list:
-            try:
-                to_insert_thumbs.append(ImageItem(
-                    img_path=path,
-                    parent=self
-                ))
-                success_count += 1
-                self.set_pb_value(success_count / img_len)
-            except Exception as e:
-                logger.error(f'CuttingErrorApp {path}传入出错\n{e}')
-                img_len -= 1
+        to_insert_thumbs = [None for _ in range(img_len)]  # 2.确定需要插入的缩略图对象 list of thumbnails to be inserted
+        self.success_count = 0
+
+        def update_thumb(img_list, i):
+            item = ImageItem(
+                img_path=img_list[i],
+                parent=self
+            )
+            to_insert_thumbs[i] = item
+            self.success_count += 1
+            self.set_pb_value(self.success_count / img_len)
+
+        # t1 = time.time()
+        # 加速预览图读取
+        with ThreadPoolExecutor(max_workers=CPU_COUNT) as pool:
+            all_task = [pool.submit(update_thumb, self.img_list, i) for i in range(img_len)]
+            wait(all_task, return_when=ALL_COMPLETED)
+        # t2 = time.time()
+        # print(f'耗时{t2 - t1}')
+        # for i, path in enumerate(self.img_list):
+        #     try:
+        #         to_insert_thumbs[i] = ImageItem(
+        #             img_path=path,
+        #             parent=self
+        #         )
+        #         self.success_count += 1
+        #         self.set_pb_value(self.success_count / img_len)
+        #     except Exception as e:
+        #         logger.error(f'CuttingErrorApp {path}传入出错\n{e}')
+        #         img_len -= 1
+        # t3 = time.time()
+        # print(f'耗时{t3 - t2}')
+
         minimum_to_show_img_num = 1  # 最小要显示图片数量 minimum number of images to show
-        if len(to_insert_thumbs) < minimum_to_show_img_num:
+        if self.success_count < minimum_to_show_img_num:
             to_insert_thumbs.extend(
                 [ImageItem(
                     img_path='source\\to_show_img.png',
@@ -195,6 +241,7 @@ class CuttingErrorApp(ft.UserControl):
         '''
         self.init_data()
         self.img_list = list(map(lambda f: f.path, e.files))
+        self.name_path_dt = {get_image_name_from_path(path): path for path in self.img_list}
         self.have_select = True
         self.update_thumbs()  # 更新缩略图 update the thumbnail
         self.main_content.reset()
@@ -245,3 +292,17 @@ class CuttingErrorApp(ft.UserControl):
 
         print(self.defect_dt)
 
+    def on_tab_change(self, e: ft.ControlEvent):
+        """
+        切换tab change tab
+        :param e: 点击对象 click object
+        :return: None
+        """
+        if type(self.manual_annotation_control.content) is ft.Text:
+            self.result_panel.to_show_annotation_button.content = self.result_panel.manual_annotation_row1
+        else:
+            if self.main_content_tabs.selected_index == 1:
+                self.result_panel.to_show_annotation_button.content = self.result_panel.manual_annotation_row2
+            else:
+                self.result_panel.to_show_annotation_button.content = self.result_panel.manual_annotation_row1
+        self.result_panel.to_show_annotation_button.update()

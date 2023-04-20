@@ -4,7 +4,7 @@ from img_process.cut_image import save_img, cut_0
 
 from img_process.pre_process import get_useful_range, read_image
 
-STEP = 128
+STEP = 256
 SIZE = 512
 PATH = 'new_output/cut'
 
@@ -17,7 +17,7 @@ def get_main_column_index(c0, c1, c2):
 def line_cut(image_data):
     r0, c0, _ = image_data.shape
     r1, r2, c1, c2 = get_useful_range(image_data)
-    c_index = get_main_column_index(c0, c1, c2)
+    c_index = get_main_column_index(c0, c1, c2)  # 判断是使用c1还是c2
 
     # line_a, row1; line_b, row2
     r_a = int(max(0, r1 - SIZE / 2))
@@ -35,7 +35,7 @@ def line_cut(image_data):
         c_a += STEP
         c_b += STEP
 
-    #line_c, column
+    # line_c, column
     r_e = int(max(0, r1 - SIZE / 2))
     r_f = int(r_e + SIZE)
     if c_index == 1:
@@ -55,8 +55,9 @@ def line_cut(image_data):
 if __name__ == '__main__':
     import glob
     from utils import clear
-    clear(PATH+'/ng')
-    clear(PATH+'/ok')
+
+    clear(PATH + '/ng')
+    clear(PATH + '/ok')
     clear('new_output/img')
     imgs = glob.glob('image\\*')
     # imgs = glob.glob('image\\1207-3_(16)*')

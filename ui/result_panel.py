@@ -1,5 +1,7 @@
 import flet as ft
 
+from ui.manual_annotation import ManualAnnotation
+
 
 # 结果显示控制面板，包括裁决该图像是否为切割异常，以及导出与显示最终结果
 class ResultPanel(ft.UserControl):
@@ -10,6 +12,7 @@ class ResultPanel(ft.UserControl):
         """
         super().__init__()
         self.item_name: str = ''  # 当前图像名字 current image name
+        self.image_path: str = ''  # 当前图像路径 current image path
         self.parent = parent
 
         self.percentage = 0
@@ -23,24 +26,73 @@ class ResultPanel(ft.UserControl):
         )
         self.final_result = ft.Text(
             # 显示当前图片文件最终是否为切割异常的结果 show the final result of the current image file is cut abnormal
-            value='本图最终结果为：?'
+            value='本图最终结果为：?',
         )
         self.change_button = ft.ElevatedButton(  # 点击修改结果按钮 click the button to change the result
-            text='预测结果错误，点击修改',
-            on_click=self.change_result
+            text='点击修改最终结果',
+            on_click=self.change_result,
         )
+        self.manual_annotation_button = ft.ElevatedButton(  # 点击修改结果按钮 click the button to change the result
+            text='手工标注',
+            on_click=self.manual_annotation
+        )
+        self.manual_annotation_tip = ft.Text(
+            value='未手工标注',
+            color=ft.colors.BLUE
+        )
+        self.manual_annotation_row1 = ft.Row(
+            controls=[
+                self.manual_annotation_button,
+                self.manual_annotation_tip
+            ],
+            alignment=ft.MainAxisAlignment.CENTER
+        )
+        self.cancel_annotation_button = ft.ElevatedButton(
+            text='取消标注',
+            on_click=self.cancel_annotation
+        )
+        self.save_annotation_button = ft.ElevatedButton(
+            text='保存标注',
+            on_click=self.save_annotation
+        )
+
+        self.manual_annotation_row2 = ft.Row(
+            controls=[
+                self.cancel_annotation_button,
+                self.save_annotation_button
+            ],
+            alignment=ft.MainAxisAlignment.CENTER
+        )
+
+        self.to_show_annotation_button = ft.Container(
+            content=self.manual_annotation_row1,
+        )
+
         self.item_result_control_panel = ft.Column(
             controls=[
-                self.predict_percentage
+                ft.Container(
+                    self.predict_percentage,
+                    alignment=ft.alignment.center
+                )
             ],
             alignment=ft.MainAxisAlignment.CENTER
         )
 
         self.single_control_panel = ft.Column(
             controls=[
-                self.predict_result,
-                self.final_result,
-                self.change_button
+                ft.Container(
+                    self.predict_result,
+                    alignment=ft.alignment.center
+                ),
+                ft.Container(
+                    self.final_result,
+                    alignment=ft.alignment.center
+                ),
+                ft.Container(
+                    self.change_button,
+                    alignment=ft.alignment.center
+                ),
+                self.to_show_annotation_button
             ],
             alignment=ft.MainAxisAlignment.CENTER
         )
@@ -60,9 +112,18 @@ class ResultPanel(ft.UserControl):
         )
         self.all_control_panel = ft.Column(
             controls=[
-                self.all_result,
-                self.show_result,
-                self.export_result
+                ft.Container(
+                    self.all_result,
+                    alignment=ft.alignment.center
+                ),
+                ft.Container(
+                    self.show_result,
+                    alignment=ft.alignment.center
+                ),
+                ft.Container(
+                    self.export_result,
+                    alignment=ft.alignment.center
+                )
             ],
             alignment=ft.MainAxisAlignment.CENTER
         )
@@ -86,6 +147,64 @@ class ResultPanel(ft.UserControl):
             alignment=ft.MainAxisAlignment.CENTER
         )
 
+
+    def check_img_ls_exist(func):
+        def check(self, *args, **kwargs):
+            if not self.parent.predict_result:
+                self.parent.set_tip_value('请先选择要处理的图片')
+                return
+            func(self, *args, **kwargs)
+        return check
+
+    @check_img_ls_exist
+    def manual_annotation(self, e):
+        """
+        手动标注
+        :return:
+        """
+        self.parent.manual_annotation_control.content = ManualAnnotation(self.image_path, self.parent)
+        self.parent.manual_annotation_control.update()
+        self.parent.main_content_tabs.selected_index = 1
+        self.parent.main_content_tabs.update()
+        self.to_show_annotation_button.content = self.manual_annotation_row2
+        self.to_show_annotation_button.update()
+
+    @check_img_ls_exist
+    def cancel_annotation(self, e):
+        """
+        取消标注
+        :return:
+        """
+        self.manual_annotation_tip.value = '未手工标注'
+        self.manual_annotation_tip.update()
+        self.parent.manual_annotation.pop(self.item_name, None)
+        self.to_show_annotation_button.content = self.manual_annotation_row1
+        self.to_show_annotation_button.update()
+        self.parent.main_content_tabs.selected_index = 0
+        self.parent.main_content_tabs.update()
+        self.update()
+
+    @check_img_ls_exist
+    def save_annotation(self, e):
+        """
+        保存标注
+        :return:
+        """
+        abs_points = self.parent.manual_annotation_control.content.get_abs_pos()
+        if abs_points[2] is None:
+            self.parent.set_tip_value('请先进行标注再保存')
+            return
+        self.manual_annotation_tip.value = '已完成手工标注'
+        self.manual_annotation_tip.update()
+        self.parent.manual_annotation[self.item_name] = abs_points
+        print(self.parent.manual_annotation)
+        self.to_show_annotation_button.content = self.manual_annotation_row1
+        self.to_show_annotation_button.update()
+        self.parent.main_content_tabs.selected_index = 0
+        self.parent.main_content_tabs.update()
+        self.update()
+
+    @check_img_ls_exist
     def change_result(self, e):
         """
         修改预测结果
@@ -96,6 +215,7 @@ class ResultPanel(ft.UserControl):
 
     def reset(self):
         self.item_name = ''
+        self.image_path = ''
         self.percentage = 0
         self.predict_percentage.value = '本区域为切割异常的可能性为：?%'
         self.predict_result.value = '根据算法，本图预测结果为：?'
@@ -105,12 +225,16 @@ class ResultPanel(ft.UserControl):
 
     def update(self):
         predict_defect = self.parent.predict_result.get(self.item_name, {})
-        final_predict_defect = self.parent.final_result.get(self.item_name, {})
+        final_predict_defect = self.parent.final_result.get(self.item_name, {}) or \
+                               (self.item_name in self.parent.manual_annotation)
+        final_ls = [v or (k in self.parent.manual_annotation) for k, v in self.parent.final_result.items()]
+        # print(self.item_name, self.parent.final_result, self.parent.manual_annotation, final_predict_defect, final_ls)
+
         self.predict_percentage.value = f'本区域为切割异常的可能性为：{round(self.percentage, 2)}%'
         self.predict_result.value = f'根据算法，本图预测结果为：{"有缺陷" if predict_defect else "正常"}'
         self.final_result.value = f'本图最终结果为：{"有缺陷" if final_predict_defect else "正常"}'
-        normal_count = list(self.parent.final_result.values()).count(False)
-        defect_count = list(self.parent.final_result.values()).count(True)
+        normal_count = final_ls.count(False)
+        defect_count = final_ls.count(True)
         total_count = len(self.parent.img_list)
         processed_count = len(self.parent.final_result)
         self.all_result.value = f'本批共选中{total_count}张样品图像，已完成检测{processed_count}张，其中{defect_count}张为存在缺陷样品，{normal_count}张为正常样品'

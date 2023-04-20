@@ -13,6 +13,7 @@ class ResultBody(ft.UserControl):
         self.places = None
         self.parent = parent
         self.item_name = None
+        self.image_path = None
         self.ng_dt = {}
         # self.img_paths = []
         self.percentages = []
@@ -74,8 +75,9 @@ class ResultBody(ft.UserControl):
     def build(self):
         return self.img_col_content
 
-    def set_item_name(self, name: str):
+    def set_item_name(self, name: str, image_path: str):
         self.item_name = name
+        self.image_path = image_path
         self.ng_dt = self.parent.defect_dt.get(self.item_name, {})
         ngs = sorted(self.ng_dt.items(), key=lambda x: x[1], reverse=True)
         # self.img_paths = [f'temp/cut/{self.item_name}/{key}.png' for key in [ng[0] for ng in ngs]]
@@ -109,12 +111,15 @@ class ResultBody(ft.UserControl):
         self.image_item.src_base64 = cv2_base64(read_image('source/to_show_img.png'))
         self.places = None
         self.item_name = None
+        self.image_path = None
         self.ng_dt = {}
         # self.img_paths = []
         self.percentages = []
         self.length = 0
         self.index = 0
+        self.text.value = '0/0'
         self.set_buttons()
+
         super().update()
 
     def update(self):
@@ -128,6 +133,8 @@ class ResultBody(ft.UserControl):
         self.text.value = f'{self.index + 1 if self.length > 0 else self.index}/{self.length}'
 
         self.parent.result_panel.item_name = self.item_name
+        self.parent.result_panel.image_path = self.image_path
         self.parent.result_panel.percentage = self.percentages[self.index] if self.length > 0 else 0
+        self.parent.result_panel.manual_annotation_tip.value = '未手工标注' if self.image_path not in self.parent.manual_annotation else '已完成手工标注'
         self.parent.result_panel.update()
         super().update()

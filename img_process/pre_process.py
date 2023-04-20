@@ -33,6 +33,7 @@ def image_binarization(img_data: np.ndarray) -> np.ndarray:
     retval, dst = cv2.threshold(gray, 65, 255, cv2.THRESH_BINARY)
     return dst
 
+
 def get_useful_range(img_data: np.ndarray) -> tuple[int, int, int, int]:
     """
       c1      c2
@@ -111,7 +112,7 @@ def get_useful_range(img_data: np.ndarray) -> tuple[int, int, int, int]:
     return r1, r2, c1, c2
 
 
-def save_new_image(img_data: np.ndarray, new_range: tuple[int, int, int, int], new_path: str, fun = None):
+def save_new_image(img_data: np.ndarray, new_range: tuple[int, int, int, int], new_path: str, fun=None):
     r1, r2, c1, c2 = map(int, new_range)
     new = img_data[r1: r2, c1: c2]
     if fun is not None:

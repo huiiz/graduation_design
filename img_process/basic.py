@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from PIL import Image
 
 
 def read_image(img_path: str) -> np.ndarray:
@@ -20,3 +21,8 @@ def get_image_by_range(img_data: np.ndarray, ranges: tuple[int, int, int, int]) 
     """
     r1, r2, c1, c2 = ranges
     return img_data[r1:r2 + 1, c1:c2 + 1, :]
+
+
+def get_img_size(img_path):
+    img = Image.open(img_path)
+    return img.size

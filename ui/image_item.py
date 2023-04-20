@@ -19,6 +19,7 @@ class ImageItem(ft.UserControl):
         )
         self.parent = parent  # 设置调用该对象的父类
         self.main_content = parent.main_content  # 获取父类对应显示
+        self.image_path = img_path  # 设置要处理的图像地址
         self.selected = False  # 是否是被选中的（对颜色进行适当调整）
         # 图片部分
         self.img_content = ft.Image(
@@ -117,12 +118,17 @@ class ImageItem(ft.UserControl):
             self.parent.set_tip_value('该图片正在处理，请等待处理完成再查看结果！')
             return
         if self.parent.selected_image_item:  # 如果调用父类中已经有选中的缩略图对象
-            if id(self.parent.selected_image_item) == id(self):  # 判断选中的缩略图是不是当前这个
+            if self.parent.selected_image_item is self:  # 判断选中的缩略图是不是当前这个
                 return
             self.parent.selected_image_item.selected = False  # 取消原对象的选中状态
             self.parent.selected_image_item.set_cancel_selected_status()  # 将原对象样式调整为未选中状态
         self.selected = True  # 将当前对象设为选中状态
         self.parent.selected_image_item = self  # 将调用父类选中缩略图对象设置为本对象
         self.set_selected_status()  # 设置当前对象样式为选中状态
-        self.main_content.set_item_name(self.img_name)
+        self.main_content.set_item_name(self.img_name, self.image_path)
         self.main_content.update()
+        self.parent.main_content_tabs.selected_index = 0
+        self.parent.manual_annotation_control.content = ft.Text('请点击手工标注按钮')
+        self.parent.main_content_tabs.update()
+        self.parent.result_panel.to_show_annotation_button.content = self.parent.result_panel.manual_annotation_row1
+        self.parent.result_panel.to_show_annotation_button.update()

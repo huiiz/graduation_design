@@ -1,4 +1,6 @@
 import flet as ft
+from flet_core import Theme
+
 from ui.cutting_error_app import CuttingErrorApp
 
 
@@ -21,7 +23,10 @@ def ui(page: ft.Page):
 
     page.on_resize = page_resize  # 设置窗口尺寸大小变化时的监听事件 set the event when the window size is changed
     page.overlay.append(cutting_error_app.pick_files_dialog)  # 选择文件对话框 set the file picker dialog
-
+    page.fonts = {
+        'OPPOSans': 'source/OPPOSans-M.ttf'
+    }
+    page.theme = Theme(font_family="OPPOSans")
     page.add(
         cutting_error_app
     )
