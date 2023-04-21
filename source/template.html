@@ -7,9 +7,11 @@
         header, footer {
             text-align: center;
         }
+
         .sentence {
             text-indent: 2em;
         }
+
         /* includes alternating gray and white with on-hover color */
         .restable {
             margin-right: auto;
@@ -33,14 +35,15 @@
             background: silver;
             cursor: pointer;
         }
-        @media print  {
-          .print_no_show {
-            display: none !important;
-          }
 
-        .predict_defect_img {
-            width: 60%;
-        }
+        @media print {
+            .print_no_show {
+                display: none !important;
+            }
+
+            .predict_defect_img {
+                width: 60%;
+            }
         }
 
         .print_no_show {
@@ -55,6 +58,7 @@
             height: 100%;
             text-align: center;
         }
+
         .defect_img_tip {
             font-weight: bolder;
         }
@@ -66,104 +70,112 @@
     </style>
 </head>
 <body>
-    <header>
-        <h1><a style="font-weight: bolder">液晶屏切割缺陷检测系统</a>结果报告</h1>
-        <h3>报告时间：{{report_datetime}}</h3>
-        <h3>报告平台：基于机器视觉技术的液晶屏切割缺陷辅助检测系统</h3>
-        <h5 onclick="print()" class="print_no_show">>>点击打印报告<<</h5>
-    </header>
-    <main>
-        <section>
-            <h2>一、检测结果概要</h2>
-<!--  本轮共检测了a份样本,其中b份被自动判断为缺陷样本,c份自动检测样本结果被手动修改,d份被手动标注为缺陷样本,最终d份标记为缺陷样本.各样本标记情况如下.  -->
-            <p class="sentence">{{description}}</p>
-        <h5 onclick="exportTableToCSV('检测结果概要{{report_datetime}}.csv')" class="print_no_show">>>点击导出表格为csv文件<<</h5>
-            {{table}}
-        </section>
-        <section>
-            <h2>二、详细结果与缺陷部位图片</h2>
-            {% for img_item in img_names %}
-            <h3 id="{{ids[img_item]}}">{{img_item}}</h3>
-            <p>文件路径：{{name_path_dt[img_item]}}</p>
-            <p>算法检测结果：{{'缺陷' if predict_result[img_item] else '正常'}}</p>
-            <p>是否手动更改结果：{{'否' if predict_result[img_item] == final_result[img_item] else '是'}}</p>
-            <p>是否手动标注：{{'是' if img_item in manual_annotation else '否'}}</p>
-            <p>最终结果：<a class="res">{{'缺陷' if (predict_result[img_item] or img_item in manual_annotation) else '正常'}}</a></p>
-            <!-- 显示算法检测缺陷区域 -->
-            {% if defect_dt[img_item] %}
-            <p class="defect_img_tip">算法检测缺陷部分</p>
-            <ul>
-                {% for defect_item in defect_dt[img_item] %}
-                <li>
-                    <p>缺陷概率：{{defect_item['possibility']}}%；图片坐标:左上：({{defect_item['points'][0]}}, {{defect_item['points'][2]}}), 右下：({{defect_item['points'][1]}}, {{defect_item['points'][3]}})</p>
-                    <div class="defect_img">
-                        <img class="predict_defect_img" src="data:image/jpg;base64,{{defect_item['img_base64']}}" alt="{{img_item}} 算法自动检测可能存在缺陷部分{{loop.index}}">
-                        <div style="
+<header>
+    <h1><a style="font-weight: bolder">液晶屏切割缺陷检测系统</a>结果报告</h1>
+    <h3>报告时间：{{report_datetime}}</h3>
+    <h3>报告平台：基于机器视觉技术的液晶屏切割缺陷辅助检测系统</h3>
+    <h5 onclick="print()" class="print_no_show">>>点击打印报告<<</h5>
+</header>
+<main>
+    <section>
+        <h2>一、检测结果概要</h2>
+        <!--  本轮共检测了a份样本,其中b份被自动判断为缺陷样本,c份自动检测样本结果被手动修改,d份被手动标注为缺陷样本,最终d份标记为缺陷样本.各样本标记情况如下.  -->
+        <p class="sentence">{{description}}</p>
+        <h5 onclick="exportTableToCSV('检测结果概要{{report_datetime}}.csv')" class="print_no_show">
+            >>点击导出表格为csv文件<<</h5>
+        {{table}}
+    </section>
+    <section>
+        <h2>二、详细结果与缺陷部位图片</h2>
+        {% for img_item in img_names %}
+        <h3 id="{{ids[img_item]}}">{{img_item}}</h3>
+        <p>文件路径：{{name_path_dt[img_item]}}</p>
+        <p>算法检测结果：{{'缺陷' if predict_result[img_item] else '正常'}}</p>
+        <p>是否手动更改结果：{{'否' if predict_result[img_item] == final_result[img_item] else '是'}}</p>
+        <p>是否手动标注：{{'是' if img_item in manual_annotation else '否'}}</p>
+        <p>最终结果：<a class="res">{{'缺陷' if (predict_result[img_item] or img_item in manual_annotation) else
+            '正常'}}</a></p>
+        <!-- 显示算法检测缺陷区域 -->
+        {% if defect_dt[img_item] %}
+        <p class="defect_img_tip">算法检测缺陷部分</p>
+        <ul>
+            {% for defect_item in defect_dt[img_item] %}
+            <li>
+                <p>缺陷概率：{{defect_item['possibility']}}%；图片坐标:左上：({{defect_item['points'][0]}},
+                    {{defect_item['points'][2]}}), 右下：({{defect_item['points'][1]}}, {{defect_item['points'][3]}})</p>
+                <div class="defect_img">
+                    <img class="predict_defect_img" src="data:image/jpg;base64,{{defect_item['img_base64']}}"
+                         alt="{{img_item}} 算法自动检测可能存在缺陷部分{{loop.index}}">
+                    <div style="
                             color: #999;
                             padding: 2px;"
-                            class="img_tag">
-                            {{img_item}} 算法自动检测可能存在缺陷部分{{loop.index}}
-                        </div>
+                         class="img_tag">
+                        {{img_item}} 算法自动检测可能存在缺陷部分{{loop.index}}
                     </div>
-                </li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-
-            {% if img_item in manual_annotation %}
-            <p class="defect_img_tip">手工标注缺陷部分</p>
-            <ul>
-                <li>
-                    <p>图片坐标：左上({{manual_annotation[img_item]['points'][0]}}, {{manual_annotation[img_item]['points'][2]}}), 右下({{manual_annotation[img_item]['points'][1]}}, {{manual_annotation[img_item]['points'][3]}})</p>
-                    <div class="defect_img">
-                        <img src="data:image/jpg;base64,{{manual_annotation[img_item]['img_base64']}}" alt="{{img_item}} 手工标注缺陷部分">
-                        <div style="
-                            color: #999;
-                            padding: 2px;"
-                            class="img_tag">
-                            {{img_item}} 手工标注缺陷部分
-                        </div>
-                    </div>
-                </li>
-            </ul>
-            {% endif %}
+                </div>
+            </li>
             {% endfor %}
-        </section>
+        </ul>
+        {% endif %}
 
-    </main>
-    <footer>
-<!--        <p>结果仅供毕设展示</p>-->
-    </footer>
+        {% if img_item in manual_annotation %}
+        <p class="defect_img_tip">手工标注缺陷部分</p>
+        <ul>
+            <li>
+                <p>图片坐标：左上({{manual_annotation[img_item]['points'][0]}},
+                    {{manual_annotation[img_item]['points'][2]}}), 右下({{manual_annotation[img_item]['points'][1]}},
+                    {{manual_annotation[img_item]['points'][3]}})</p>
+                <div class="defect_img">
+                    <img src="data:image/jpg;base64,{{manual_annotation[img_item]['img_base64']}}"
+                         alt="{{img_item}} 手工标注缺陷部分">
+                    <div style="
+                            color: #999;
+                            padding: 2px;"
+                         class="img_tag">
+                        {{img_item}} 手工标注缺陷部分
+                    </div>
+                </div>
+            </li>
+        </ul>
+        {% endif %}
+        {% endfor %}
+    </section>
+
+</main>
+<footer>
+    <!--        <p>结果仅供毕设展示</p>-->
+</footer>
 <script>
     var predict_img_tags = document.getElementsByClassName("img_tag");
     for (var i = 0; i < predict_img_tags.length; i++) {
         predict_img_tags[i].textContent = "图" + (i + 1) + " " + predict_img_tags[i].textContent;
     }
+
     // 将表格导出为csv文件
     function exportTableToCSV(filename) {
-  var csv = [];
-  var rows = document.querySelectorAll("table tr");
+        var csv = [];
+        var rows = document.querySelectorAll("table tr");
 
-  for (var i = 0; i < rows.length; i++) {
-    var row = [], cols = rows[i].querySelectorAll("td, th");
+        for (var i = 0; i < rows.length; i++) {
+            var row = [], cols = rows[i].querySelectorAll("td, th");
 
-    for (var j = 0; j < cols.length; j++)
-      row.push(cols[j].innerText);
+            for (var j = 0; j < cols.length; j++)
+                row.push(cols[j].innerText);
 
-    csv.push(row.join(","));
-  }
+            csv.push(row.join(","));
+        }
 
-  // 创建下载链接
-  var link = document.createElement("a");
-  link.setAttribute("href", "data:text/csv;charset=utf-8,\ufeff" + encodeURIComponent(csv.join("\n")));
-  link.setAttribute("download", filename);
-  link.style.display = "none";
+        // 创建下载链接
+        var link = document.createElement("a");
+        link.setAttribute("href", "data:text/csv;charset=utf-8,\ufeff" + encodeURIComponent(csv.join("\n")));
+        link.setAttribute("download", filename);
+        link.style.display = "none";
 
-  // 添加到页面并触发点击
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
+        // 添加到页面并触发点击
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 
 
 </script>
