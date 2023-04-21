@@ -1,5 +1,6 @@
 import flet as ft
 
+from report.result import save_and_show_result, HtmlReport
 from ui.manual_annotation import ManualAnnotation
 
 
@@ -102,13 +103,13 @@ class ResultPanel(ft.UserControl):
         self.all_result = ft.Text(  # 整体数量部分
             value='本批共选中?张样品图像，已完成检测0张，其中?张为存在缺陷样品，?张为正常样品'
         )
-        self.show_result = ft.ElevatedButton(  # 预览结果
-            text='预览结果',
-            on_click=None
-        )
+        # self.show_result = ft.ElevatedButton(  # 预览结果
+        #     text='预览结果',
+        #     on_click=None
+        # )
         self.export_result = ft.ElevatedButton(  # 保存结果为文件
-            text='保存结果',
-            on_click=None
+            text='保存并预览检测报告',
+            on_click=self.save_result
         )
         self.all_control_panel = ft.Column(
             controls=[
@@ -116,10 +117,10 @@ class ResultPanel(ft.UserControl):
                     self.all_result,
                     alignment=ft.alignment.center
                 ),
-                ft.Container(
-                    self.show_result,
-                    alignment=ft.alignment.center
-                ),
+                # ft.Container(
+                #     self.show_result,
+                #     alignment=ft.alignment.center
+                # ),
                 ft.Container(
                     self.export_result,
                     alignment=ft.alignment.center
@@ -182,6 +183,7 @@ class ResultPanel(ft.UserControl):
         self.to_show_annotation_button.update()
         self.parent.main_content_tabs.selected_index = 0
         self.parent.main_content_tabs.update()
+        self.parent.final_result[self.item_name] = self.parent.predict_result[self.item_name]
         self.update()
 
     @check_img_ls_exist
@@ -210,8 +212,35 @@ class ResultPanel(ft.UserControl):
         修改预测结果
         :return:
         """
-        self.parent.final_result[self.item_name] = not self.parent.final_result[self.item_name]
-        self.update()
+        if self.item_name not in self.parent.manual_annotation:
+            self.parent.final_result[self.item_name] = not self.parent.final_result[self.item_name]
+            self.update()
+        else:
+            self.parent.final_result[self.item_name] = self.parent.predict_result[self.item_name]
+            self.parent.set_tip_value('该图片已手动标注，需取消标注后才能修改预测结果')
+            self.update()
+
+    def save_result(self, e):
+        """
+        保存结果
+        :return:
+        """
+        if not self.parent.img_list:
+            self.parent.set_tip_value('请先选择要处理图片!')
+            return
+        if not self.parent.begin_to_process:
+            self.parent.set_tip_value('请先处理图片!')
+            return
+        if len(self.parent.predict_result) != len(self.parent.img_list):
+            self.parent.set_tip_value('请等待处理完成!')
+            return
+        if self.parent.main_content_tabs.selected_index == 1:
+            self.parent.set_tip_value('请先退出手工标注模式!')
+            return
+
+        html_report = HtmlReport(self.parent)
+        html_report.save_and_show_html()
+        self.parent.set_tip_value('保存成功，已打开检测报告')
 
     def reset(self):
         self.item_name = ''

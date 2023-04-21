@@ -61,8 +61,8 @@ class Defect:
         self.path = img_path
         self.name = get_image_name_from_path(img_path)
         self.img_data = read_image(self.path)
-        self.cut_path = f'{CUT_PATH}/{self.name}'
-        clear(self.cut_path)
+        # self.cut_path = f'{CUT_PATH}/{self.name}'
+        # clear(self.cut_path)
 
     def cut_image(self):
         """

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>液晶屏切割缺陷检测系统结果报告|报告时间：{{report_datetime}}</title>
+    <style>
+        header, footer {
+            text-align: center;
+        }
+        p {
+            text-indent: 2em;
+        }
+        /* includes alternating gray and white with on-hover color */
+        .restable {
+            margin-right: auto;
+            margin-left: auto;
+            text-align: center;
+            font-size: 11pt;
+            font-family: Arial;
+            border-collapse: collapse;
+            border: 1px solid silver;
+        }
+
+        .restable td, th {
+            padding: 5px;
+        }
+
+        .restable tr:nth-child(even) {
+            background: #E0E0E0;
+        }
+
+        .restable tr:hover {
+            background: silver;
+            cursor: pointer;
+        }
+        @media print  {
+          .print_click {
+            display: none !important;
+          }
+        }
+
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a style="font-weight: bolder">液晶屏切割缺陷检测系统</a>结果报告</h1>
+        <h3>报告时间：{{report_datetime}}</h3>
+        <h3>报告平台：基于机器视觉技术的液晶屏切割缺陷辅助检测系统</h3>
+        <h5 onclick="print()" class="print_click">>>点击打印报告<<</h5>
+    </header>
+    <main>
+        <section>
+            <h2>一、检测结果概要</h2>
+<!--  本轮共检测了a份样本,其中b份被自动判断为缺陷样本,c份自动检测样本结果被手动修改,d份被手动标注为缺陷样本,最终d份标记为缺陷样本.各样本标记情况如下.  -->
+            <p>{{description}}</p>
+            {{table}}
+        </section>
+        <section>
+            <h2>二、详细结果与缺陷部位图片</h2>
+        </section>
+
+    </main>
+    <footer>
+<!--        <p>结果仅供毕设展示</p>-->
+    </footer>
+</body>
+</html>

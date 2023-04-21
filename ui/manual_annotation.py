@@ -5,6 +5,8 @@ from img_process.change_tiff import cv2_base64
 
 w_dif = 6 + 2 * 10
 h_dif = 40 + 90 + 7 + 3 * 10
+
+
 # 人工标注图像
 class ManualAnnotation(ft.UserControl):
     def __init__(self, img_path: str, parent):
@@ -23,13 +25,13 @@ class ManualAnnotation(ft.UserControl):
 
         self.img_path = img_path
         self.parent = parent
-        self.change_y = 0       # 在本宽度下，下滑距离
-        self.old_change_y = 0   # 上一次下滑距离
-        self.change_y_per = 0   # 下滑距离百分比
-        self.old_change_y_per = 0   # 上一次下滑距离百分比
+        self.change_y = 0  # 在本宽度下，下滑距离
+        self.old_change_y = 0  # 上一次下滑距离
+        self.change_y_per = 0  # 下滑距离百分比
+        self.old_change_y_per = 0  # 上一次下滑距离百分比
         self.points = [None for _ in range(4)]  # 记录框选的四个点
         parent.parent.on_resize = self.page_resize
-        self.c = ft.Container() # 用于显示框选的矩形
+        self.c = ft.Container()  # 用于显示框选的矩形
         # 鼠标操作
         self.g_block = ft.GestureDetector(
             mouse_cursor=ft.MouseCursor.PRECISE,
@@ -49,7 +51,7 @@ class ManualAnnotation(ft.UserControl):
             alignment=ft.alignment.center_right
         )
         # name = "ScanImage_Image0 (6).tiff"
-        self.w, self.h = get_img_size(self.img_path)    # 图像宽高
+        self.w, self.h = get_img_size(self.img_path)  # 图像宽高
         # print(self.w, self.h)
         # print(self.img_path)
         # 显示图像
@@ -61,7 +63,7 @@ class ManualAnnotation(ft.UserControl):
             fit=ft.ImageFit.FIT_WIDTH,
             offset=ft.transform.Offset(0, 0),
             width=self.g.width,
-            height=self.h / (self.w / self.g.width),    #根据比例设置图像高度
+            height=self.h / (self.w / self.g.width),  # 根据比例设置图像高度
         )
         # 将图像放在Column中，使其可以完整显示
         self.img_column = ft.Column(
@@ -89,9 +91,9 @@ class ManualAnnotation(ft.UserControl):
         # print(self.parent.main_content.width)
         self.img.width = self.g.width
         self.img.height = self.h / (self.w / self.g.width)
-        self.img.offset = ft.transform.Offset(0, -1 * self.change_y_per)    # 设置窗口大小变化时，图像的偏移
-        self.change_y = self.change_y_per * self.img.height                 # 更新下滑距离
-        self.old_change_y = self.old_change_y_per * self.img.height                 # 更新下滑距离
+        self.img.offset = ft.transform.Offset(0, -1 * self.change_y_per)  # 设置窗口大小变化时，图像的偏移
+        self.change_y = self.change_y_per * self.img.height  # 更新下滑距离
+        self.old_change_y = self.old_change_y_per * self.img.height  # 更新下滑距离
         self.img.update()
 
         self.img_c.width, self.img_c.height = self.g.width, self.g.height
@@ -101,8 +103,6 @@ class ManualAnnotation(ft.UserControl):
             self.update_rectangle()
             # print('resize points update!', self.points)
             # print(self.points)
-
-
 
     def click(self, e):
         """
@@ -141,7 +141,7 @@ class ManualAnnotation(ft.UserControl):
         abs_p[3] = self.points[3] * self.w / self.g.width
         abs_p[0] = offset + self.points[0] * self.w / self.g.width
         abs_p[2] = offset + self.points[2] * self.w / self.g.width
-        return abs_p
+        return abs_p[0], abs_p[2], abs_p[1], abs_p[3]
 
     def scroll(self, e: ft.ScrollEvent):
         # print(self.g.width, self.g.height)
