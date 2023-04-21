@@ -1,6 +1,6 @@
 import flet as ft
 
-from report.result import save_and_show_result, HtmlReport
+from report.result import HtmlReport
 from ui.manual_annotation import ManualAnnotation
 
 
@@ -107,8 +107,12 @@ class ResultPanel(ft.UserControl):
         #     text='预览结果',
         #     on_click=None
         # )
+        self.show_report = ft.Checkbox(
+            label='保存检测报告后是否打开进行预览？',
+            value=True
+        )
         self.export_result = ft.ElevatedButton(  # 保存结果为文件
-            text='保存并预览检测报告',
+            text='保存检测报告',
             on_click=self.save_result
         )
         self.all_control_panel = ft.Column(
@@ -121,6 +125,10 @@ class ResultPanel(ft.UserControl):
                 #     self.show_result,
                 #     alignment=ft.alignment.center
                 # ),
+                ft.Container(
+                    self.show_report,
+                    alignment=ft.alignment.center
+                ),
                 ft.Container(
                     self.export_result,
                     alignment=ft.alignment.center
@@ -212,6 +220,8 @@ class ResultPanel(ft.UserControl):
         修改预测结果
         :return:
         """
+        if self.parent.main_content_tabs.selected_index == 1:
+            return # 如果当前是单图模式，不允许修改预测结果
         if self.item_name not in self.parent.manual_annotation:
             self.parent.final_result[self.item_name] = not self.parent.final_result[self.item_name]
             self.update()
@@ -239,8 +249,8 @@ class ResultPanel(ft.UserControl):
             return
 
         html_report = HtmlReport(self.parent)
-        html_report.save_and_show_html()
-        self.parent.set_tip_value('保存成功，已打开检测报告')
+        res_fname = html_report.save_and_show_html(self.show_report.value)
+        self.parent.set_tip_value(f'检测报告已保存至{res_fname}文件中')
 
     def reset(self):
         self.item_name = ''

@@ -141,6 +141,7 @@ class ManualAnnotation(ft.UserControl):
         abs_p[3] = self.points[3] * self.w / self.g.width
         abs_p[0] = offset + self.points[0] * self.w / self.g.width
         abs_p[2] = offset + self.points[2] * self.w / self.g.width
+        abs_p = list(map(int, abs_p))
         return abs_p[0], abs_p[2], abs_p[1], abs_p[3]
 
     def scroll(self, e: ft.ScrollEvent):

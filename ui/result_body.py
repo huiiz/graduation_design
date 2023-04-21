@@ -27,7 +27,8 @@ class ResultBody(ft.UserControl):
             alignment=ft.alignment.center
         )
         self.text = ft.Text(
-            value='0/0'
+            value='0/0',
+            color=ft.colors.GREY
         )
         self.text_container = ft.Container(
             content=self.text,
