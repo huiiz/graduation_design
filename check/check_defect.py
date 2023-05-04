@@ -5,7 +5,7 @@ import numpy as np
 from img_process.cut_image import save_img
 from img_process.new_process import line_cut
 from img_process.pre_process import get_useful_range
-from utils import CPU_COUNT, clear, get_image_name_from_path
+from utils import CPU_COUNT, clear, get_image_name_from_path, speed_up
 
 from img_process.basic import read_image, get_image_by_range
 from network.predict import Predict
@@ -77,6 +77,8 @@ class Defect:
         # for cut_range in points:
         #     save_img(self.img_data, cut_range, f'{self.cut_path}/{cut_range[0]}_{cut_range[2]}.png')
 
+
+
     def predict_cutted_images(self):
         """
         预测这张大图中所有小图的结果
@@ -87,8 +89,7 @@ class Defect:
         # result_map = np.ones((self.cut_i, self.cut_j))
         ng_dt = dict()
         # for image in images:
-        for point_tuple in points:
-            # [i, j] = image.split('\\')[-1].split('.')[0].split('_')
+        def predict_img(point_tuple: tuple, ng_dt: dict):
             i, _1, j, _2 = point_tuple
             # print(i, j, end=' ')
             # pool.submit(self.predict_single_img, image, result_map, int(i), int(j))
@@ -101,18 +102,16 @@ class Defect:
                 if percentage > 0.05:
                     ng_dt[f'{i}_{j}'] = prob.item()
                     set_defect_imgs_dt(self.name, f'{i}_{j}', img_data)
-            # print(cls, prob)
+        # 加速测试
+        # import time
+        # t1 = time.time()
+        # for point_tuple in points:
+        #     predict_img(point_tuple, ng_dt)
+        # print(f'未加速耗时{time.time()-t1}秒')
+        # t1 = time.time()
+        speed_up(predict_img, points, ng_dt)
+        # print(f'加速后耗时{time.time()-t1}秒')
 
-            # result_map[int(i), int(j)] = res
-            # print(i, j, res)
-            # img = Image.open(image)
-            # plt.title(f'{i}, {j}, {res}')
-            # plt.imshow(img)
-            # plt.show()
-        # pool.shutdown()
-        # print(np.min(result_map))
-
-        # print(result_map)
         return ng_dt
 
     # def predict_single_img(self, image, result_map, i, j):

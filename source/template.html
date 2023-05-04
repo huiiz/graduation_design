@@ -67,11 +67,32 @@
             color: crimson;
         }
 
+        .image_title {
+            color: darkslateblue;
+        }
+
+        /*点击使其回到顶部，固定在屏幕右下方*/
+        .top {
+            position: fixed;
+            bottom: 20px; /* 距离底部 20px */
+            right: 20px; /* 距离右边 20px */
+              border-radius: 50%; /* 设置圆形外轮廓 */
+              opacity: 0.5; /* 设置 50% 透明度 */
+              background-color: transparent; /* 去掉背景色 */
+            /*border: 3px solid #1296db;*/
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .top:hover {
+            opacity: 1; /* 设置 100% 透明度 */
+        }
+
     </style>
 </head>
 <body>
 <header>
-    <h1><a style="font-weight: bolder">液晶屏切割缺陷检测系统</a>结果报告</h1>
+    <h1 id="title"><a style="font-weight: bolder">液晶屏切割缺陷检测系统</a>结果报告</h1>
     <h3>报告时间：{{report_datetime}}</h3>
     <h3>报告平台：基于机器视觉技术的液晶屏切割缺陷辅助检测系统</h3>
     <h5 onclick="print()" class="print_no_show">>>点击打印报告<<</h5>
@@ -88,7 +109,7 @@
     <section>
         <h2>二、详细结果与缺陷部位图片</h2>
         {% for img_item in img_names %}
-        <h3 id="{{ids[img_item]}}">{{img_item}}</h3>
+        <h3 id="{{ids[img_item]}}" class="image_title">{{img_item}}</h3>
         <p>文件路径：{{name_path_dt[img_item]}}</p>
         <p>算法检测结果：{{'缺陷' if predict_result[img_item] else '正常'}}</p>
         <p>是否手动更改结果：{{'否' if predict_result[img_item] == final_result[img_item] else '是'}}</p>
@@ -143,6 +164,9 @@
 
 </main>
 <footer>
+    <div class="top print_no_show" onclick="window.location.href='#title'">
+        <svg t="1682135523088" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2627" width="50" height="50"><path d="M484.538555 297.401434 78.508052 703.407378c-11.784394 11.813047-11.784394 30.912034 0 42.724057 11.81714 11.81407 30.94171 11.81407 42.757826 0l386.211109-386.181433 379.830795 379.806235c11.453866 11.482519 30.039153 11.482519 41.491996 0 11.511171-11.453866 11.511171-30.039153 0-41.516556L534.372543 303.776631c-1.543146-1.539053-3.417843-2.296299-5.200442-3.412726-0.691755-0.935302-1.055029-2.085498-1.933025-2.962471-11.784394-11.784394-30.912034-11.784394-42.695405 0L484.538555 297.401434zM484.538555 297.401434" fill="#1296db" p-id="2628"></path></svg>
+    </div>
     <!--        <p>结果仅供毕设展示</p>-->
 </footer>
 <script>

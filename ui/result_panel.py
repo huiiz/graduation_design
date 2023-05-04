@@ -186,6 +186,7 @@ class ResultPanel(ft.UserControl):
         """
         self.manual_annotation_tip.value = '未手工标注'
         self.manual_annotation_tip.update()
+        self.parent.manual_annotation_control.content.del_rectangle()
         self.parent.manual_annotation.pop(self.item_name, None)
         self.to_show_annotation_button.content = self.manual_annotation_row1
         self.to_show_annotation_button.update()
@@ -241,7 +242,7 @@ class ResultPanel(ft.UserControl):
         if not self.parent.begin_to_process:
             self.parent.set_tip_value('请先处理图片!')
             return
-        if len(self.parent.predict_result) != len(self.parent.img_list):
+        if len(self.parent.defect_dt) != len(self.parent.img_list):
             self.parent.set_tip_value('请等待处理完成!')
             return
         if self.parent.main_content_tabs.selected_index == 1:
@@ -268,7 +269,8 @@ class ResultPanel(ft.UserControl):
                                (self.item_name in self.parent.manual_annotation)
         final_ls = [v or (k in self.parent.manual_annotation) for k, v in self.parent.final_result.items()]
         # print(self.item_name, self.parent.final_result, self.parent.manual_annotation, final_predict_defect, final_ls)
-
+        self.manual_annotation_tip.value = '未手工标注' if self.item_name not in self.parent.manual_annotation else '已完成手工标注'
+        self.manual_annotation_tip.update()
         self.predict_percentage.value = f'本区域为切割异常的可能性为：{round(self.percentage, 2)}%'
         self.predict_result.value = f'根据算法，本图预测结果为：{"有缺陷" if predict_defect else "正常"}'
         self.final_result.value = f'本图最终结果为：{"有缺陷" if final_predict_defect else "正常"}'

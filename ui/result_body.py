@@ -136,6 +136,6 @@ class ResultBody(ft.UserControl):
         self.parent.result_panel.item_name = self.item_name
         self.parent.result_panel.image_path = self.image_path
         self.parent.result_panel.percentage = self.percentages[self.index] if self.length > 0 else 0
-        self.parent.result_panel.manual_annotation_tip.value = '未手工标注' if self.image_path not in self.parent.manual_annotation else '已完成手工标注'
+
         self.parent.result_panel.update()
         super().update()

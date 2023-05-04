@@ -110,6 +110,9 @@ class ManualAnnotation(ft.UserControl):
         :param e:
         :return:
         """
+        self.del_rectangle()
+
+    def del_rectangle(self):
         self.points = [None for _ in range(4)]
         self.c.width = None
         self.c.height = None

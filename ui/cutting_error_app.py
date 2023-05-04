@@ -11,7 +11,7 @@ from ui.manual_annotation import ManualAnnotation
 from ui.result_body import ResultBody
 from ui.result_panel import ResultPanel
 from ui.image_item import ImageItem
-from utils import get_image_name_from_path, CPU_COUNT
+from utils import get_image_name_from_path, CPU_COUNT, speed_up
 
 
 # 程序主界面 the main window
@@ -120,7 +120,8 @@ class CuttingErrorApp(ft.UserControl):
         self.predict_result = {}  # 预测结果 predict result, True表示有缺陷，False表示无缺陷
         self.final_result = {}  # 最终结果 final result
         self.manual_annotation = {}  # 手动标注结果 manual annotation result
-        self.name_path_dt = {}
+        self.name_path_dt = {} # 图像名字与路径的对应关系 name and path of the image
+        self.show_thumb_finish = False # 是否显示缩略图完成
 
     def set_body_height(self):
         """
@@ -182,7 +183,7 @@ class CuttingErrorApp(ft.UserControl):
         to_insert_thumbs = [None for _ in range(img_len)]  # 2.确定需要插入的缩略图对象 list of thumbnails to be inserted
         self.success_count = 0
 
-        def update_thumb(img_list, i):
+        def update_thumb(i, img_list):
             item = ImageItem(
                 img_path=img_list[i],
                 parent=self
@@ -191,11 +192,13 @@ class CuttingErrorApp(ft.UserControl):
             self.success_count += 1
             self.set_pb_value(self.success_count / img_len)
 
+        # 加速预览图读取
+        speed_up(update_thumb, range(img_len), self.img_list)
         # t1 = time.time()
         # 加速预览图读取
-        with ThreadPoolExecutor(max_workers=CPU_COUNT) as pool:
-            all_task = [pool.submit(update_thumb, self.img_list, i) for i in range(img_len)]
-            wait(all_task, return_when=ALL_COMPLETED)
+        # with ThreadPoolExecutor(max_workers=CPU_COUNT) as pool:
+        #     all_task = [pool.submit(update_thumb, i, self.img_list) for i in range(img_len)]
+        #     wait(all_task, return_when=ALL_COMPLETED)
         # t2 = time.time()
         # print(f'耗时{t2 - t1}')
         # for i, path in enumerate(self.img_list):
@@ -247,6 +250,7 @@ class CuttingErrorApp(ft.UserControl):
         self.main_content.reset()
         self.result_panel.reset()
         self.update()
+        self.show_thumb_finish = True
 
     def process(self, e):
         """
@@ -255,6 +259,9 @@ class CuttingErrorApp(ft.UserControl):
         """
         if not self.have_select:
             self.set_tip_value('请先选择图片')
+            return
+        if not self.show_thumb_finish:
+            self.set_tip_value('请等待图像加载完毕')
             return
         if self.begin_to_process:
             if len(self.defect_dt) < len(self.img_list):
