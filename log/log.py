@@ -25,7 +25,7 @@ logging_config = {
             'when': "d",  # 时间单位可以是h, d, m , y
             'interval': 1,		# 单位数量，多长时间开始新的记录
             'backupCount': 30,		# 能保存的最大日志文件数量
-            'filename': 'log/output.log',
+            'filename': 'output.log',
             'encoding': 'utf-8'
         }
     },

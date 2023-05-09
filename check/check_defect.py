@@ -2,10 +2,8 @@ import os.path
 
 import numpy as np
 
-from img_process.cut_image import save_img
 from img_process.new_process import line_cut
-from img_process.pre_process import get_useful_range
-from utils import CPU_COUNT, clear, get_image_name_from_path, speed_up
+from utils import CPU_COUNT, get_image_name_from_path, speed_up
 
 from img_process.basic import read_image, get_image_by_range
 from network.predict import Predict

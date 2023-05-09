@@ -29,7 +29,7 @@ def image_binarization(img_data: np.ndarray) -> np.ndarray:
     gray = cv2.cvtColor(img_data, cv2.COLOR_BGR2GRAY)
 
     # retval, dst = cv2.threshold(gray, 110, 255, cv2.THRESH_BINARY)
-    # 最大类间方差法(大津算法)，thresh会被忽略，自动计算一个阈值
+    # 阈值法二值化
     retval, dst = cv2.threshold(gray, 65, 255, cv2.THRESH_BINARY)
     return dst
 

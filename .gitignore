@@ -2,3 +2,6 @@
 /.idea/
 /network/weights/
 /temp/report/
+/build/
+/dist/
+/main.spec

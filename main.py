@@ -1,7 +1,8 @@
+import os
+
 from ui.ui_main import show
-# from utils import clear
 
 if __name__ == '__main__':
-    # clear('temp/img')
-    # clear('temp/cut')
+    if not os.path.exists('temp/report'):
+        os.makedirs('temp/report')
     show()

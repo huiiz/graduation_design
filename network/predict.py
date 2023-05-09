@@ -1,16 +1,10 @@
-import os
-import json
-
 import numpy as np
 import torch
 from PIL import Image
 from torchvision import transforms
 
-model_weight_path = "./network/weights/xbest_model_g.pth"
-if 'xx' in model_weight_path:
-    from network.model import mobile_vit_xx_small as create_model
-else:
-    from network.model import mobile_vit_x_small as create_model
+model_weight_path = "./source/xbest_model.pth"
+from network.model import mobile_vit_x_small as create_model
 class_indict = {
     "0": "ng",
     "1": "ok"
